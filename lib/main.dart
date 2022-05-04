@@ -1,4 +1,6 @@
+import 'package:crud_between_screen/list_provider.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import 'child_screen.dart';
 
@@ -11,15 +13,22 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-        title: 'CRUD Testing between screen',
-        theme: ThemeData(
-          primarySwatch: Colors.blue,
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider<ListProvider>(
+          create: (context) => ListProvider(),
         ),
-        home: const MyHomePage(title: 'Flutter Demo Home Page'),
-        routes: {
-          ChildScreen.routeName: (context) => const ChildScreen(),
-        });
+      ],
+      child: MaterialApp(
+          title: 'CRUD Testing between screen',
+          theme: ThemeData(
+            primarySwatch: Colors.blue,
+          ),
+          home: const MyHomePage(title: 'Flutter Demo Home Page'),
+          routes: {
+            ChildScreen.routeName: (context) => const ChildScreen(),
+          }),
+    );
   }
 }
 
@@ -33,17 +42,6 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  final List<String> _item = [];
-
-  var _count = 0;
-
-  void _incrementCounter() {
-    setState(() {
-      _item.add("item $_count");
-      _count++;
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -51,37 +49,34 @@ class _MyHomePageState extends State<MyHomePage> {
         title: Text(widget.title),
       ),
       body: Center(
-        child: ListView.builder(
-          itemBuilder: (BuildContext ctx, int i) {
-            debugPrint(i.toString());
-            return GestureDetector(
-              child: Card(child: Text(_item[i])),
-              onTap: () async {
-                final result = await Navigator.of(context).pushNamed(
-                  ChildScreen.routeName,
-                  arguments: ChildScreenArgs(text: _item[i]),
-                ) as String?;
-                if (result != null) {
-                  final int index = _item.indexOf(result);
-                  setState(() {
-                    if (result != _item[i]) {
-                      _item[_item.indexWhere((e) => e == _item[i])] = result;
-                    } else {
-                      _item.removeAt(index);
-                    }
-                  });
-                }
-              },
-            );
-          },
-          itemCount: _item.length,
-        ),
+        child: Consumer<ListProvider>(builder: (context, model, _) {
+          return ListView.builder(
+            itemBuilder: (BuildContext ctx, int i) {
+              debugPrint(i.toString());
+              return GestureDetector(
+                child: Card(child: Text(model.get()[i])),
+                onTap: () async {
+                  await Navigator.of(context).pushNamed(
+                    ChildScreen.routeName,
+                    arguments: ChildScreenArgs(key: model.get()[i]),
+                  );
+                },
+              );
+            },
+            itemCount: model.get().length,
+          );
+        }),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
+      floatingActionButton:
+          Consumer<ListProvider>(builder: (context, model, _) {
+        return FloatingActionButton(
+          onPressed: () {
+            model.addList("item");
+          },
+          tooltip: 'Increment',
+          child: const Icon(Icons.add),
+        ); // This trailing comma makes auto-formatting nicer for build methods.
+      }),
     );
   }
 }
