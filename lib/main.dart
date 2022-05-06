@@ -1,11 +1,15 @@
-import 'package:crud_between_screen/list_provider.dart';
+import 'package:crud_between_screen/list_notifier.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'child_screen.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(
+    const ProviderScope(
+      child: MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
@@ -13,70 +17,59 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MultiProvider(
-      providers: [
-        ChangeNotifierProvider<ListProvider>(
-          create: (context) => ListProvider(),
+    return MaterialApp(
+        title: 'CRUD Testing between screen',
+        theme: ThemeData(
+          primarySwatch: Colors.blue,
         ),
-      ],
-      child: MaterialApp(
-          title: 'CRUD Testing between screen',
-          theme: ThemeData(
-            primarySwatch: Colors.blue,
-          ),
-          home: const MyHomePage(title: 'Flutter Demo Home Page'),
-          routes: {
-            ChildScreen.routeName: (context) => const ChildScreen(),
-          }),
-    );
+        home: const MyHomePage(title: 'Flutter Demo Home Page'),
+        routes: {
+          ChildScreen.routeName: (context) => const ChildScreen(),
+        });
   }
 }
 
-class MyHomePage extends StatefulWidget {
+final listProvider = StateNotifierProvider<ListNotifier, List<String>>((ref) {
+  return ListNotifier();
+});
+
+class MyHomePage extends ConsumerWidget {
   const MyHomePage({Key? key, required this.title}) : super(key: key);
 
   final String title;
 
   @override
-  State<MyHomePage> createState() => _MyHomePageState();
-}
-
-class _MyHomePageState extends State<MyHomePage> {
-  @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final list = ref.watch(listProvider);
+    final notifier = ref.watch(listProvider.notifier);
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.title),
+        title: Text(title),
       ),
       body: Center(
-        child: Consumer<ListProvider>(builder: (context, model, _) {
-          return ListView.builder(
-            itemBuilder: (BuildContext ctx, int i) {
-              debugPrint(i.toString());
-              return GestureDetector(
-                child: Card(child: Text(model.get()[i])),
-                onTap: () async {
-                  await Navigator.of(context).pushNamed(
-                    ChildScreen.routeName,
-                    arguments: ChildScreenArgs(key: model.get()[i]),
-                  );
-                },
-              );
-            },
-            itemCount: model.get().length,
-          );
-        }),
-      ),
-      floatingActionButton:
-          Consumer<ListProvider>(builder: (context, model, _) {
-        return FloatingActionButton(
-          onPressed: () {
-            model.addList("item");
+        child: ListView.builder(
+          itemBuilder: (BuildContext ctx, int i) {
+            debugPrint(i.toString());
+            return GestureDetector(
+              child: Card(child: Text(list[i])),
+              onTap: () async {
+                await Navigator.of(context).pushNamed(
+                  ChildScreen.routeName,
+                  arguments: ChildScreenArgs(key: list[i]),
+                );
+              },
+            );
           },
-          tooltip: 'Increment',
-          child: const Icon(Icons.add),
-        ); // This trailing comma makes auto-formatting nicer for build methods.
-      }),
+          itemCount: list.length,
+        ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          notifier.addList("item");
+        },
+        tooltip: 'Increment',
+        child: const Icon(Icons.add),
+      ), // This trailing comma makes auto-formatting nicer for build methods.
     );
   }
 }

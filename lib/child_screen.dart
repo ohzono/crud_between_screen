@@ -1,25 +1,31 @@
-import 'package:crud_between_screen/list_provider.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class ChildScreen extends StatelessWidget {
+import 'main.dart';
+
+class ChildScreen extends ConsumerWidget {
   const ChildScreen({Key? key}) : super(key: key);
 
   static String routeName = "/child_screen";
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final args = ModalRoute.of(context)?.settings.arguments as ChildScreenArgs;
-    ListProvider list = Provider.of<ListProvider>(context);
-    final String item = list.get().firstWhere((element) => element == args.key);
+    final list = ref.watch(listProvider);
+    final notifier = ref.watch(listProvider.notifier);
+    final String item =
+        list.firstWhere((element) => element == args.key, orElse: () {
+      debugPrint("This item has deleted or replaced: ${args.key}");
+      return "";
+    });
     return GestureDetector(
       child: Text("delete $item"),
       onTap: () {
-        list.remove(item);
+        notifier.remove(item);
         Navigator.pop(context);
       },
       onLongPress: () {
-        list.update(item);
+        notifier.update(item);
         Navigator.pop(context);
       },
     );
