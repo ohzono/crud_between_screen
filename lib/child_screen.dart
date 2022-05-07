@@ -11,8 +11,8 @@ class ChildScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final args = ModalRoute.of(context)?.settings.arguments as ChildScreenArgs;
-    final list = ref.watch(listProvider);
-    final notifier = ref.watch(listProvider.notifier);
+    final list = ref.read(listProvider);
+    final notifier = ref.read(listProvider.notifier);
     final String item =
         list.firstWhere((element) => element == args.key, orElse: () {
       debugPrint("This item has deleted or replaced: ${args.key}");

@@ -33,43 +33,53 @@ final listProvider = StateNotifierProvider<ListNotifier, List<String>>((ref) {
   return ListNotifier();
 });
 
-class MyHomePage extends ConsumerWidget {
+class MyHomePage extends StatelessWidget {
   const MyHomePage({Key? key, required this.title}) : super(key: key);
 
   final String title;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final list = ref.watch(listProvider);
-    final notifier = ref.watch(listProvider.notifier);
+  Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text(title),
       ),
       body: Center(
-        child: ListView.builder(
-          itemBuilder: (BuildContext ctx, int i) {
-            debugPrint(i.toString());
-            return GestureDetector(
-              child: Card(child: Text(list[i])),
-              onTap: () async {
-                await Navigator.of(context).pushNamed(
-                  ChildScreen.routeName,
-                  arguments: ChildScreenArgs(key: list[i]),
+        child: Consumer(
+          builder: (context, ref, _) {
+            return ListView.builder(
+              itemBuilder: (BuildContext ctx, int i) {
+                debugPrint(i.toString());
+                return GestureDetector(
+                  child: Card(
+                    child: Text(
+                      ref.read(listProvider)[i],
+                    ),
+                  ),
+                  onTap: () async {
+                    await Navigator.of(context).pushNamed(
+                      ChildScreen.routeName,
+                      arguments: ChildScreenArgs(
+                        key: ref.read(listProvider)[i],
+                      ),
+                    );
+                  },
                 );
               },
+              itemCount: ref.watch(listProvider).length,
             );
           },
-          itemCount: list.length,
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          notifier.addList("item");
-        },
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
+      floatingActionButton: Consumer(builder: (context, ref, child) {
+        return FloatingActionButton(
+          onPressed: () {
+            ref.read(listProvider.notifier).addList("item");
+          },
+          tooltip: 'Increment',
+          child: const Icon(Icons.add),
+        );
+      }),
     );
   }
 }
