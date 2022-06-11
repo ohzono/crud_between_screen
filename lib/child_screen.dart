@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'grand_child_screen.dart';
 import 'item.dart';
 import 'main.dart';
 
@@ -42,9 +43,14 @@ class ChildScreen extends ConsumerWidget {
             const SizedBox(height: 100),
             ElevatedButton(
               child: const Text("add inner list"),
-              onPressed: () {
-                notifier.addItemInnerList(
-                    item.name, "added item ${item.innerItemList.length}");
+              onPressed: () async {
+                await Navigator.of(context).pushNamed(
+                  GrandChildScreen.routeName,
+                  arguments: GrandChildScreenArgs(
+                    name: item.name,
+                    addedItem: "added item ${item.innerItemList.length}",
+                  ),
+                );
               },
             ),
             for (var i in item.innerItemList)

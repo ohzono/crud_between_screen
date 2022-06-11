@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import 'child_screen.dart';
+import 'grand_child_screen.dart';
 import 'item.dart';
 
 final itemListProvider =
@@ -31,6 +32,7 @@ class MyApp extends StatelessWidget {
         home: const MyHomePage(title: 'Flutter Demo Home Page'),
         routes: {
           ChildScreen.routeName: (context) => const ChildScreen(),
+          GrandChildScreen.routeName: (context) => const GrandChildScreen(),
         });
   }
 }
