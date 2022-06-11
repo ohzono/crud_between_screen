@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import 'child_screen.dart';
-import 'grand_child_screen.dart';
 import 'item.dart';
 
 final itemListProvider =
@@ -25,15 +24,12 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-        title: 'CRUD Testing between screen',
-        theme: ThemeData(
-          primarySwatch: Colors.blue,
-        ),
-        home: const MyHomePage(title: 'Flutter Demo Home Page'),
-        routes: {
-          ChildScreen.routeName: (context) => const ChildScreen(),
-          GrandChildScreen.routeName: (context) => const GrandChildScreen(),
-        });
+      title: 'CRUD Testing between screen',
+      theme: ThemeData(
+        primarySwatch: Colors.blue,
+      ),
+      home: const MyHomePage(title: 'Flutter Demo Home Page'),
+    );
   }
 }
 
@@ -63,9 +59,10 @@ class MyHomePage extends HookConsumerWidget {
                     ),
                   ),
                   onTap: () async {
-                    await Navigator.of(context).pushNamed(
-                      ChildScreen.routeName,
-                      arguments: ChildScreenArgs(key: list[i].name),
+                    await Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) => ChildScreen(name: list[i].name),
+                      ),
                     );
                   },
                 );

@@ -6,19 +6,20 @@ import 'item.dart';
 import 'main.dart';
 
 class ChildScreen extends ConsumerWidget {
-  const ChildScreen({Key? key}) : super(key: key);
-
-  static String routeName = "/child_screen";
+  const ChildScreen({
+    Key? key,
+    required final this.name,
+  }) : super(key: key);
+  final String name;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final args = ModalRoute.of(context)?.settings.arguments as ChildScreenArgs;
     final list = ref.watch(itemListProvider);
     final notifier = ref.read(itemListProvider.notifier);
     final ItemState item =
-        list.firstWhere((element) => element.name == args.key, orElse: () {
-      debugPrint("This item has deleted or replaced: ${args.key}");
-      return ItemState(name: args.key.toString(), innerItemList: []);
+        list.firstWhere((element) => element.name == name, orElse: () {
+      debugPrint("This item has deleted or replaced: $name");
+      return ItemState(name: name, innerItemList: []);
     });
     return Scaffold(
       appBar: AppBar(
@@ -44,11 +45,12 @@ class ChildScreen extends ConsumerWidget {
             ElevatedButton(
               child: const Text("add inner list"),
               onPressed: () async {
-                await Navigator.of(context).pushNamed(
-                  GrandChildScreen.routeName,
-                  arguments: GrandChildScreenArgs(
-                    name: item.name,
-                    addedItem: "added item ${item.innerItemList.length}",
+                await Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) => GrandChildScreen(
+                      name: item.name,
+                      addedItem: "added item ${item.innerItemList.length}",
+                    ),
                   ),
                 );
               },
@@ -65,10 +67,4 @@ class ChildScreen extends ConsumerWidget {
       ),
     );
   }
-}
-
-class ChildScreenArgs {
-  final String key;
-
-  ChildScreenArgs({required this.key});
 }
