@@ -1,8 +1,14 @@
-import 'package:crud_between_screen/list_notifier.dart';
+import 'package:crud_between_screen/item_list.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import 'child_screen.dart';
+import 'item.dart';
+
+final itemListProvider =
+    StateNotifierProvider<ItemListNotifier, List<ItemState>>((ref) {
+  return ItemListNotifier(ref.read);
+});
 
 void main() {
   runApp(
@@ -29,17 +35,14 @@ class MyApp extends StatelessWidget {
   }
 }
 
-final listProvider = StateNotifierProvider<ListNotifier, List<String>>((ref) {
-  return ListNotifier();
-});
-
-class MyHomePage extends StatelessWidget {
+class MyHomePage extends HookConsumerWidget {
   const MyHomePage({Key? key, required this.title}) : super(key: key);
 
   final String title;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final list = ref.watch(itemListProvider);
     return Scaffold(
       appBar: AppBar(
         title: Text(title),
@@ -52,21 +55,20 @@ class MyHomePage extends StatelessWidget {
                 debugPrint(i.toString());
                 return GestureDetector(
                   child: Card(
-                    child: Text(
-                      ref.read(listProvider)[i],
+                    child: Padding(
+                      padding: const EdgeInsets.all(30),
+                      child: Text(list[i].name),
                     ),
                   ),
                   onTap: () async {
                     await Navigator.of(context).pushNamed(
                       ChildScreen.routeName,
-                      arguments: ChildScreenArgs(
-                        key: ref.read(listProvider)[i],
-                      ),
+                      arguments: ChildScreenArgs(key: list[i].name),
                     );
                   },
                 );
               },
-              itemCount: ref.watch(listProvider).length,
+              itemCount: list.length,
             );
           },
         ),
@@ -74,7 +76,12 @@ class MyHomePage extends StatelessWidget {
       floatingActionButton: Consumer(builder: (context, ref, child) {
         return FloatingActionButton(
           onPressed: () {
-            ref.read(listProvider.notifier).addList("item");
+            ref.read(itemListProvider.notifier).addList(
+                  ItemState(
+                    name: "item ${list.length}",
+                    innerItemList: [],
+                  ),
+                );
           },
           tooltip: 'Increment',
           child: const Icon(Icons.add),

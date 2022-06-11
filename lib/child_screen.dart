@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'item.dart';
 import 'main.dart';
 
 class ChildScreen extends ConsumerWidget {
@@ -11,23 +12,51 @@ class ChildScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final args = ModalRoute.of(context)?.settings.arguments as ChildScreenArgs;
-    final list = ref.read(listProvider);
-    final notifier = ref.read(listProvider.notifier);
-    final String item =
-        list.firstWhere((element) => element == args.key, orElse: () {
+    final list = ref.watch(itemListProvider);
+    final notifier = ref.read(itemListProvider.notifier);
+    final ItemState item =
+        list.firstWhere((element) => element.name == args.key, orElse: () {
       debugPrint("This item has deleted or replaced: ${args.key}");
-      return "";
+      return ItemState(name: args.key.toString(), innerItemList: []);
     });
-    return GestureDetector(
-      child: Text("delete $item"),
-      onTap: () {
-        notifier.remove(item);
-        Navigator.pop(context);
-      },
-      onLongPress: () {
-        notifier.update(item);
-        Navigator.pop(context);
-      },
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(item.name),
+      ),
+      body: SizedBox(
+        height: double.infinity,
+        width: double.infinity,
+        child: ListView(
+          children: [
+            GestureDetector(
+              child: Text("delete $item"),
+              onTap: () {
+                notifier.remove(item);
+                Navigator.pop(context);
+              },
+              onLongPress: () {
+                notifier.update(item);
+                Navigator.pop(context);
+              },
+            ),
+            const SizedBox(height: 100),
+            ElevatedButton(
+              child: const Text("add inner list"),
+              onPressed: () {
+                notifier.addItemInnerList(
+                    item.name, "added item ${item.innerItemList.length}");
+              },
+            ),
+            for (var i in item.innerItemList)
+              Card(
+                child: Padding(
+                  padding: const EdgeInsets.all(50),
+                  child: Text(i),
+                ),
+              ),
+          ],
+        ),
+      ),
     );
   }
 }
