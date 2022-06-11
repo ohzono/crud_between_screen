@@ -1,13 +1,18 @@
 import 'package:crud_between_screen/item_list.dart';
+import 'package:crud_between_screen/item_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import 'child_screen.dart';
 import 'item.dart';
 
+final repositoryProvider = Provider((ref) => ItemRepository());
 final itemListProvider =
     StateNotifierProvider<ItemListNotifier, List<ItemState>>((ref) {
-  return ItemListNotifier(ref.read);
+  final ItemRepository repo = ref.read(repositoryProvider);
+  return ItemListNotifier(
+    itemRepository: repo,
+  );
 });
 
 void main() {

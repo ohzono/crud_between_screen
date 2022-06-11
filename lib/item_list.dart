@@ -1,27 +1,33 @@
+import 'package:crud_between_screen/item_repository.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'item.dart';
 
 class ItemListNotifier extends StateNotifier<List<ItemState>> {
-  final Reader _read;
-  ItemListNotifier(this._read) : super(const []);
+  ItemListNotifier({
+    required this.itemRepository,
+  }) : super(const []);
+  final ItemRepository itemRepository;
 
   void addList(ItemState item) {
-    state = [...state, item];
+    state = [...itemRepository.fetchAll(), item];
+    itemRepository.save(state);
   }
 
   void remove(ItemState item) {
     state = [
-      for (final it in state)
+      for (final it in itemRepository.fetchAll())
         if (it != item) it,
     ];
+    itemRepository.save(state);
   }
 
   void update(ItemState item) {
     state = [
-      for (final it in state)
+      for (final it in itemRepository.fetchAll())
         if (it == item) item else it
     ];
+    itemRepository.save(state);
   }
 
   void addItemInnerList(String itemName, String innerItem) {
@@ -31,8 +37,9 @@ class ItemListNotifier extends StateNotifier<List<ItemState>> {
       innerItemList: [...targetItem.innerItemList, innerItem],
     );
     state = [
-      for (final it in state)
+      for (final it in itemRepository.fetchAll())
         if (it.name == itemName) t else it
     ];
+    itemRepository.save(state);
   }
 }
