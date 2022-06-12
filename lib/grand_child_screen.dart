@@ -14,7 +14,7 @@ class GrandChildScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final notifier = ref.read(itemListProvider.notifier);
+    final notifier = ref.read(itemListNotifier.notifier);
     return Scaffold(
       appBar: AppBar(
         title: const Text("Confirm"),

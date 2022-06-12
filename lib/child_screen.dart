@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'grand_child_screen.dart';
-import 'item.dart';
+import 'item_state.dart';
 import 'main.dart';
 
 class ChildScreen extends ConsumerWidget {
@@ -14,8 +14,8 @@ class ChildScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final list = ref.watch(itemListProvider);
-    final notifier = ref.read(itemListProvider.notifier);
+    final list = ref.watch(itemListNotifier);
+    final notifier = ref.read(itemListNotifier.notifier);
     final ItemState item =
         list.firstWhere((element) => element.name == name, orElse: () {
       debugPrint("This item has deleted or replaced: $name");

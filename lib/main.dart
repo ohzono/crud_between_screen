@@ -4,15 +4,19 @@ import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import 'child_screen.dart';
-import 'item.dart';
+import 'item_state.dart';
 
 final repositoryProvider = Provider((ref) => ItemRepository());
-final itemListProvider =
+
+final itemListNotifier =
     StateNotifierProvider<ItemListNotifier, List<ItemState>>((ref) {
   final ItemRepository repo = ref.read(repositoryProvider);
-  return ItemListNotifier(
+  ItemListNotifier notifier = ItemListNotifier(
     itemRepository: repo,
   );
+
+  notifier.init();
+  return notifier;
 });
 
 void main() {
@@ -45,7 +49,8 @@ class MyHomePage extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final list = ref.watch(itemListProvider);
+    final list = ref.watch(itemListNotifier);
+    final notifier = ref.watch(itemListNotifier.notifier);
     return Scaffold(
       appBar: AppBar(
         title: Text(title),
@@ -53,26 +58,26 @@ class MyHomePage extends HookConsumerWidget {
       body: Center(
         child: Consumer(
           builder: (context, ref, _) {
-            return ListView.builder(
-              itemBuilder: (BuildContext ctx, int i) {
-                debugPrint(i.toString());
-                return GestureDetector(
-                  child: Card(
-                    child: Padding(
-                      padding: const EdgeInsets.all(30),
-                      child: Text(list[i].name),
-                    ),
-                  ),
-                  onTap: () async {
-                    await Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (context) => ChildScreen(name: list[i].name),
+            return ListView(
+              children: list
+                  .map(
+                    (ItemState e) => GestureDetector(
+                      child: Card(
+                        child: Padding(
+                          padding: const EdgeInsets.all(30),
+                          child: Text(e.name),
+                        ),
                       ),
-                    );
-                  },
-                );
-              },
-              itemCount: list.length,
+                      onTap: () async {
+                        await Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (context) => ChildScreen(name: e.name),
+                          ),
+                        );
+                      },
+                    ),
+                  )
+                  .toList(),
             );
           },
         ),
@@ -80,12 +85,12 @@ class MyHomePage extends HookConsumerWidget {
       floatingActionButton: Consumer(builder: (context, ref, child) {
         return FloatingActionButton(
           onPressed: () {
-            ref.read(itemListProvider.notifier).addList(
-                  ItemState(
-                    name: "item ${list.length}",
-                    innerItemList: [],
-                  ),
-                );
+            notifier.addList(
+              ItemState(
+                name: "item ${list.length}",
+                innerItemList: [],
+              ),
+            );
           },
           tooltip: 'Increment',
           child: const Icon(Icons.add),
